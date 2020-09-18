@@ -1,5 +1,43 @@
 from taurex.log import Logger
 
+
+class LinesReader:
+
+    def __init__(self, lines):
+        self._lines = lines
+        self._count = 0
+    
+    def skip(self, num=1):
+        self._count += num
+
+    def read_int(self, skip=1):
+        val = int(self._lines[self._count])
+        self.skip(skip)
+        return val
+    
+    def read_float(self, skip=1):
+        val = float(self._lines[self._count])
+        self.skip(skip)
+        return val
+    
+    def read_float_array(self, skip=1):
+        line = self.read_string()
+        split = line.split()
+        return [float(s) for s in split]
+    
+    def read_string(self, skip=1):
+        val = self._lines[self._count]
+        self.skip(skip)
+        return val
+    
+    def read_bool(self, skip=1):
+        val = bool(self._lines[self._count])
+        self.skip(skip)
+        return val
+
+    def reset():
+        self._count = 0
+
 class BroadenerData:
 
     def __init__(self, molecule, filename, Jmax, default_gamma, default_n):
@@ -43,91 +81,83 @@ class ExomolDef(Logger):
 
     def parse_definition(self):
         
-        count = 0
-        if self.exocross_lines[count] != 'EXOMOL.def':
+        lr = LinesReader(self.exocross_lines)
+
+        if lr.read_string() != 'EXOMOL.def':
             raise IOError('Incorrect EXOMOL def header')
-        count += 2
-        self._molecule_slug = self.exocross_lines[count]
-        count += 1
-        self._linelist_name = self.exocross_lines[count]
-        count += 1
-        self._version_number = self.exocross_lines[count]
-        count += 1
-        self._inchikey = self.exocross_lines[count]
+
+        lr.skip(1)
+        
+        self._molecule_slug = lr.read_string()
+
+        self._linelist_name = lr.read_string()
+
+        self._version_number = lr.read_string()
+
+        self._inchikey = lr.read_string()
+
+        self._natoms = lr.read_int()
 
         self.info(f'Molecule is {self._molecule_slug}')
         self.info(f'Linelist: {self._linelist_name} '
                   f'Version: {self._version_number}')
-        count += 1
         while(True):
-            line = self.exocross_lines[count]
             try:
-                split = line.split()
-                self._mass = float(split[0])
-                float(split[1])
+                arr = lr.read_float_array()
+                self._mass = arr[0]
+                test = arr[1]
                 break
             except (IndexError, ValueError, ):
-                count += 1
                 continue
+        self._symmetry_group = lr.read_string()
 
-        count += 2  # Skip symmetry
-        num_irr = int(self.exocross_lines[count])
-        count += num_irr * 3 + 1
-        self._max_temp = float(self.exocross_lines[count])
-        count += 1
-        self._num_broadeners = int(self.exocross_lines[count])
-        count += 6
-        self._num_states = int(self.exocross_lines[count])
-        count += 1
-        num_cases = int(self.exocross_lines[count])
-        count += num_cases + 1
-        no_quanta = int(self.exocross_lines[count])
-        count += no_quanta * 3 + 1
-        self._total_transitions = int(self.exocross_lines[count])
-        count += 1 
-        self._num_trans_files = int(self.exocross_lines[count])
-        count += 1
-        self._max_wavenumber = float(self.exocross_lines[count])
-        count += 1
-        self._highest_complete = float(self.exocross_lines[count])
-        count += 1
-        self._max_temp_q = float(self.exocross_lines[count])
-        count += 1
-        self._t_step = float(self.exocross_lines[count])
-        count += 2
-        self._default_gamma = float(self.exocross_lines[count])
-        count += 1
-        self._default_n = float(self.exocross_lines[count])
+        num_irr = lr.read_int()
+        lr.skip(num_irr * 3)
+        self._max_temp = lr.read_float()
+        self._num_broadeners = lr.read_int()
+        self._dipole_avail = lr.read_bool()
+        self._no_cross = lr.read_int()
+        self._no_ktab = lr.read_int()
+
+        self._life_avail = lr.read_bool()
+        self._landeg_avail = lr.read_bool()
+
+
+        self._num_states = lr.read_int()
+        num_cases = lr.read_int()
+        lr.skip(num_cases)
+        no_quanta = lr.read_int()
+        lr.skip(no_quanta * 3)
+        self._total_transitions = lr.read_int()
+        self._num_trans_files = lr.read_int()
+        self._max_wavenumber = lr.read_float()
+        self._highest_complete = lr.read_float()
+        self._max_temp_q = lr.read_float()
+        self._t_step = lr.read_float(skip=2)
+        self._default_gamma = lr.read_float()
+        self._default_n = lr.read_float()
         self._broadener_defs = {}
 
         if self._num_broadeners > 0:
-            count += 1
             for b in range(self._num_broadeners):
 
-                broadener_label = self.exocross_lines[count]
+                broadener_label = lr.read_string()
                 self.info(f'Reading broadener {broadener_label}')
-                count += 1
-                broadener_filename = self.exocross_lines[count]
-                count += 1
-                jmax = int(self.exocross_lines[count])
-                count += 1
-                default_gamma = float(self.exocross_lines[count])
-                count += 1
-                default_n = float(self.exocross_lines[count])
-                count += 1
+                broadener_filename = lr.read_string()
+                jmax = lr.read_int()
+                default_gamma = lr.read_float()
+                default_n = lr.read_float()
 
                 new_broad = BroadenerData(broadener_label, broadener_filename,
                                           jmax, default_gamma, default_n)
                 self._broadener_defs[broadener_label] = new_broad
 
-                n_broad_quanta_set = int(self.exocross_lines[count])
-                count += 1
+                n_broad_quanta_set = lr.read_int()
                 for x in range(n_broad_quanta_set):
-                    code_label = self.exocross_lines[count]
+                    code_label = lr.read_string(skip=2)
                     new_broad.add_code(code_label)
-                    count += 2
-                    no_quanta = int(self.exocross_lines[count])
-                    count += no_quanta + 1
+                    no_quanta = lr.read_int()
+                    lr.skip(no_quanta)
 
     @property
     def maximumTemperature(self):
