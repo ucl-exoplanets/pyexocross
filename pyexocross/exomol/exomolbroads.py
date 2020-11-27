@@ -1,6 +1,6 @@
 import os
 import pathlib
-
+import numpy as np
 def _filter_func(trans, label, value):
     return trans[label] == value
 
@@ -51,6 +51,7 @@ class ExomolBroadener:
                     self._broadener_values.append((gamma,n))
 
     def set_temperature_pressure(self, T, P):
+        super().set_temperature_pressure(T, P)
         self._precomputed_values = [self.compute_gamma(gamma,n,T,P) for gamma, n in self._broadener_values]
         self._default_gamma = self.compute_default_gamma(T,P)
 
@@ -64,7 +65,7 @@ class ExomolBroadener:
         if label == 'a0':
             self._label_functions['a0'] = lambda trans, *args: _filter_func(trans,'J"',args[0])
         else:
-            self._label_functions[label] = lambda trans,*args,label_def=label_definition: reduce(and_, [_filter_func(trans,l,a) for l,a in zip(label_def,args)])
+            self._label_functions[label] = lambda trans,*args,label_def=label_definition: np.logical_and(*[_filter_func(trans,l,a) for l,a in zip(label_def,args)])
             #self._label_functions[label] = lambda trans, **args: all(_)
     
     def compute_gamma(self, gamma0,n0, T, P):

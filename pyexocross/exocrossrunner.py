@@ -17,7 +17,6 @@ class ExocrossRunner:
             input_filename = os.path.join(tmpdirname, 'input.par')
 
             stdin = exocross_input.generate_input(output_filename)
-            print(stdin)
             subprocess.run([self._exocross_path], input=stdin,encoding='ascii')
 
             output = np.loadtxt(output_filename+'.xsec')

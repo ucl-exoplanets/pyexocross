@@ -7,3 +7,6 @@ def convert_to_wavenumber(value, units):
     return conversion.value
 
 
+def compute_gamma(gamma0,n0, T, P, t0, p0):
+    
+    return gamma0*((t0/T)**n0)*(P/p0)
