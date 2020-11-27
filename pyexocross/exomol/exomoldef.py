@@ -31,9 +31,10 @@ class LinesReader:
         return val
     
     def read_bool(self, skip=1):
-        val = bool(self._lines[self._count])
+        val = int(self._lines[self._count])
+        
         self.skip(skip)
-        return val
+        return val == 1
 
     def reset():
         self._count = 0
@@ -47,9 +48,11 @@ class BroadenerData:
         self._default_n = default_n
         self._Jmax = Jmax
         self._avail_codes = []
-
-    def add_code(self, quanta_code):
+        self._quanta={}
+    def add_code(self, quanta_code, quanta):
         self._avail_codes.append(quanta_code)
+        quanta.insert(0,'J"')
+        self._quanta[quanta_code] = quanta
 
     @property
     def molecule(self):
@@ -66,6 +69,11 @@ class BroadenerData:
                             self._default_n, filename=os.path.join(broadener_path, self._filename),
                             broadener_type='JJ' if 'a1' in self._avail_codes else 'J')
         return bb
+    
+    def generate_exomolbroadener(self, filename=None):
+        from .exomolbroads import ExomolBroadener
+        return ExomolBroadener(self._default_gamma, self._default_n,label_defs=self._quanta,filename=filename)
+
 class ExomolDef(Logger):
 
     def __init__(self, exomol_def_file):
@@ -125,9 +133,22 @@ class ExomolDef(Logger):
 
         self._num_states = lr.read_int()
         num_cases = lr.read_int()
-        lr.skip(num_cases)
-        no_quanta = lr.read_int()
-        lr.skip(no_quanta * 3)
+        self._quanta_cases = {}
+        for case in range(num_cases):
+            case_label = lr.read_string()
+            no_quanta = lr.read_int()
+            quanta_definition = []
+
+            for q in range(no_quanta):
+                label = lr.read_string()
+                form = lr.read_string().split()[1].strip()
+                descrp = lr.read_string()
+
+                quanta_definition.append((label, form, descrp))
+        
+
+            self._quanta_cases[case_label] = quanta_definition
+        
         self._total_transitions = lr.read_int()
         self._num_trans_files = lr.read_int()
         self._max_wavenumber = lr.read_float()
@@ -155,10 +176,55 @@ class ExomolDef(Logger):
                 n_broad_quanta_set = lr.read_int()
                 for x in range(n_broad_quanta_set):
                     code_label = lr.read_string(skip=2)
-                    new_broad.add_code(code_label)
+                    
                     no_quanta = lr.read_int()
-                    lr.skip(no_quanta)
+                    quanta =[lr.read_string() for x in range(no_quanta)]
+                    new_broad.add_code(code_label, quanta)
 
+    def _pandas_state_fwf(self):
+        import re
+        import numpy as np
+
+        widths = [12,12,6,7]
+        headers = ['i', 'E', 'g_tot', 'J']
+
+
+        if self._life_avail:
+            widths.append(12)
+            headers.append('lftime')
+        
+        if self._landeg_avail:
+            widths.append(12)
+            headers.append('lande-g')
+        
+        # Let pandas auto determine above types
+
+        # We will be specific about the quanta
+        dtype = {}
+        form_conv = {'d' : np.int64,
+                     'f' : np.float64,
+                     's' : str }
+        for case in self._quanta_cases.values():
+            for label, form, desc in case:
+                headers.append(label)
+                wid = re.findall(r'\d+',form)[0]
+                widths.append(int(wid))
+                typ = form[-1].strip()
+                dtype[label] = form_conv[typ]
+                
+
+        widths[1:-1] = [w+1 for w in widths[1:-1]]
+
+        return headers, widths , dtype
+        
+
+    def read_state(self, state_filename):
+        from .exomolstate import ExomolStates
+        
+
+        return ExomolStates(state_filename, self._pandas_state_fwf())
+
+        
     @property
     def maximumTemperature(self):
         return self._max_temp
