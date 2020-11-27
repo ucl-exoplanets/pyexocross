@@ -4,7 +4,8 @@ class HITRANLinelist(Linelist):
 
     def __init__(self,filename,
                  ):
-        self.load_hitran_file(filename)
+        self._filename = filename
+        # self.load_hitran_file(filename)
         self.set_broadener_ratio(0.0,1.0)
     def set_broadener_ratio(self, self_ratio, air_ratio):
         self._self_ratio = self_ratio
@@ -18,24 +19,28 @@ class HITRANLinelist(Linelist):
 
 
 
-    def load_hitran_file(self, filename):
+    def hitran_iterator(self, filename):
         from .util import read_hitran
-        molid, isoid, v, S, A, gamma_air, gamma_self, E_lower, n_air, \
-        delta_air, upper_quant, lower_quant,gf,gi = \
-            zip(*[(mol, isom, vif, Sif, Aif, gair, gself, El, nair, delta_air, upq, lq,gf,gi) for \
-                  mol, isom, vif, Sif, Aif, gair, gself, El, nair, delta_air, upq, lq,gf,gi in read_hitran(filename)])
+        self._transition_df
+        # molid, isoid, v, S, A, gamma_air, gamma_self, E_lower, n_air, \
+        # delta_air, upper_quant, lower_quant,gf,gi = \
+        #     zip(*[(mol, isom, vif, Sif, Aif, gair, gself, El, nair, delta_air, upq, lq,gf,gi) for \
+        #           mol, isom, vif, Sif, Aif, gair, gself, El, nair, delta_air, upq, lq,gf,gi in read_hitran(filename)])
 
-        self._molid = molid[0]
-        self._isoid = isoid[0]
-        self._v = np.array(v)
-        self._A = np.array(A)
-        self._gamma_air = np.array(gamma_air)
-        self._gamma_self = np.array(gamma_self)
-        self._n_air = np.array(n_air)
-        self._E_lower = np.array(E_lower)
-        self._delta_air = np.array(delta_air)
-        self._gf = np.array(gf)
-        self._gi = np.array(gi)
+        # self._molid = molid[0]
+        # self._isoid = isoid[0]
+        # self._v = np.array(v)
+        # self._A = np.array(A)
+        # self._gamma_air = np.array(gamma_air)
+        # self._gamma_self = np.array(gamma_self)
+        # self._n_air = np.array(n_air)
+        # self._E_lower = np.array(E_lower)
+        # self._delta_air = np.array(delta_air)
+        # self._gf = np.array(gf)
+        # self._gi = np.array(gi)
+
+
+
 
     @property
     def totalTransitions(self):
