@@ -51,6 +51,8 @@ class ExomolStates:
         lower = self._df.iloc[idi]
         if pf is None:
             pf = self.Q(temperature)
+        elif not isinstance(pf, float):
+            pf = pf.Q(temperature)
             
 
 
@@ -89,7 +91,7 @@ class ExomolStates:
         df=pd.DataFrame(transition_frame)
 
         if threshold is not None:
-            df = df[df.Iif > threshold]
+            df = df[df.Iif >= threshold]
         
         return df
 
