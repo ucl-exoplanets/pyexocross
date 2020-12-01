@@ -61,19 +61,23 @@ class ExomolLinelist(Linelist):
             trans_list = glob.glob(filename)
             if len(trans_list) == 0:
                 filename = os.path.join(self._path, trans_filename)
-                trans_list = glob.glob(filename)      
+                trans_list = glob.glob(filename)
+            if len(trans_list) == 1:
+                filename = os.path.join(self._path, trans_list[1])
+                self._transitions = [((0.0, np.inf),filename)]
+            else:      
 
-            just_file = [pathlib.Path(f).stem for f in trans_list]
-            just_file = [f if not f.endswith('.trans') else f[:-6] for f in just_file]
+                just_file = [pathlib.Path(f).stem for f in trans_list]
+                just_file = [f if not f.endswith('.trans') else f[:-6] for f in just_file]
 
-            wavenumbers = [f[-11:].split('-') for f in just_file]
+                wavenumbers = [f[-11:].split('-') for f in just_file]
 
 
-            float_wn = [(float(mn), float(mx)) for mn, mx in wavenumbers]
+                float_wn = [(float(mn), float(mx)) for mn, mx in wavenumbers]
 
-            self._transitions = list(zip(float_wn, trans_list))
+                self._transitions = list(zip(float_wn, trans_list))
 
-            self._transitions.sort(key=lambda x: x[0])
+                self._transitions.sort(key=lambda x: x[0])
 
             self.info('Discovered Transitions \n\n %s \n\n',
                       tabulate.tabulate(self._transitions,
