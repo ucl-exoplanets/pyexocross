@@ -19,6 +19,9 @@ class Voigt:
 
     def voigt(self, wngrid, v, I, doppler, lorentz, cutoff=25.0, out=None):
         from .constants import RT2LN2
+        min_v = v.min()-cutoff
+        max_v = v.max()+cutoff
+
         start = max(0,wngrid.searchsorted(v.min()-cutoff)-1)
         end = min(wngrid.searchsorted(v.max()+cutoff),len(wngrid-1))
 
