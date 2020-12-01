@@ -36,7 +36,7 @@ def read_hitran_pandas(hitran_file, chunksize=None):
     names = ['MolID', 'IsoID', 'v_if','S_if','A_if','gamma_air','gamma_self','E"', 
              'n_air','delta_air',*[f"{x}'" for x in quanta_names],
              *[f'{x}"' for x in quanta_names],*lquanta_up,*lquanta_low,'error','Refs',
-             'Flag',"g'",'g"']
+             'Flag',"g_tot'",'g_tot"']
     
     df = pandas.read_fwf(hitran_file, widths=lengths, names=names, chunksize=chunksize)
     for chunk in df:
@@ -50,7 +50,7 @@ def moleculeGroup(molid):
                    'H2S','HO2','HCOOH','ClONO2','HOBr','C2H4'):
         quanta = ['J','Ka','Kc','F','Sym']
         widths = [3, 3, 3, 5, 1]
-        return [f"{x}'" for q in quanta], widths, \
+        return [f"{x}'" for x in quanta], widths, \
             [f'{x}"' for x in quanta], widths
 
     if molname in ('CO2', 'N2O', 'CO', 'HF','HCl', 'HBr',
@@ -64,12 +64,12 @@ def moleculeGroup(molid):
     if molname in ('SF6', 'CH4',):
         quanta = ['J','C','a','F',]
         widths = [5,2,3,5,]
-        return [f"{x}'" for q in quanta], widths, \
+        return [f"{x}'" for x in quanta], widths, \
             [f'{x}"' for x in quanta], widths
     if molname in ('CH3D','CH3Cl','C2H6', 'NH3','PH3',):
         quanta = ['J','Ka','l','C','Sym','F']
         widths = [3,3,2,2,1,4,]
-        return [f"{x}'" for q in quanta], widths, \
+        return [f"{x}'" for x in quanta], widths, \
             [f'{x}"' for x in quanta], widths
     if molename in ('O2',):
         upper_quanta = ["F'",]
