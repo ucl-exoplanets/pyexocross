@@ -58,10 +58,10 @@ class ExomolLinelist(Linelist):
            self._path is not None:
             trans_filename = f'{self._prefix}*.trans'
             trans_filename_bz2 = f'{self._prefix}*.trans.bz2'
-            filename = os.path.join(self._path, trans_filename_bz2)
+            filename = os.path.join(self._path, trans_filename)
             trans_list = glob.glob(filename)
             if len(trans_list) == 0:
-                filename = os.path.join(self._path, trans_filename)
+                filename = os.path.join(self._path, trans_filename_bz2)
                 trans_list = glob.glob(filename)
             if len(trans_list) == 1:
                 filename = os.path.join(self._path, trans_list[0])
