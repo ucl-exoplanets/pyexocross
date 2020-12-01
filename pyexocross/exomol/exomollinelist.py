@@ -127,7 +127,15 @@ class ExomolLinelist(Linelist):
                 gamma, n =self._exodef._default_gamma, self._exodef._default_n
                 broad = ExomolBroadener(gamma, n, filename=filename)
                 self.add_broadener(broad,ratio=ratio)
-        
+    
+
+    def add_default_broadener(self, ratio=1.0):
+        if 'default' not in self.availableBroadeners:
+            gamma, n =self._exodef._default_gamma, self._exodef._default_n
+            broad = ExomolBroadener(gamma, n)
+            self.add_broadener(broad,ratio=ratio)
+            
+
     def valid_transitions(self, start, end):
 
         return [filename for (min_wn, max_wn), filename in self._transitions 

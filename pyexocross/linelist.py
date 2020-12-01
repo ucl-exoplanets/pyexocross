@@ -38,7 +38,7 @@ class Linelist(Logger):
 
 
     def compute_doppler(self, temperature, df):
-        from .constants import KBOLTZ, SPDLIGT, AVGNO
+        from .util import doppler_broad
         import math
         freq = df['v_if'].values
         return doppler_broad(freq, self.molecularMass, temperature)

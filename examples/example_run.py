@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
-from pyexocross import ExomolDef, ExocrossRunner
+from pyexocross.exomol import ExomolDef
+from pyexocross import ExocrossRunner
 import numpy as np
 
 path_to_exocross = '/Users/ahmed/Documents/repos/exocross/xcross.exe'
@@ -35,14 +36,14 @@ h2_broad.ratio = 0.9
 he_broad.ratio = 0.1
 
 # Set wavelength range and point
-exocross_input.set_range([0.1, 2], units='um')
-exocross_input.Npoints = 101
+exocross_input.set_range([0.1, 10], units='um')
+exocross_input.Npoints = 10001
 
 # Lets set some temperature and pressures to run
-temperature_points = np.linspace(500, 2000, 10)
-pressure_points = np.logspace(0, 6, 10)
+temperature_points = np.linspace(500, 2000, 2)
+pressure_points = np.logspace(0, 6, 2)
 
-final_grid = np.zeros(shape=(10,10,101))
+final_grid = np.zeros(shape=(2,2,exocross_input.Npoints))
 wn_grid = None
 for ip, p in enumerate(pressure_points):
     for it, t in enumerate(temperature_points):
