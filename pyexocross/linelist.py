@@ -1,7 +1,8 @@
-
-class Linelist:
+from taurex.log import Logger
+class Linelist(Logger):
     
     def __init__(self):
+        super().__init__(self.__class__.__name__)
         self._broadeners = {}
 
     
@@ -36,9 +37,10 @@ class Linelist:
         raise NotImplementedError
 
 
-    def compute_doppler(self, temperature, freq):
+    def compute_doppler(self, temperature, df):
         from .constants import KBOLTZ, SPDLIGT
         import math
+        freq = df['v_if'].values
         return math.sqrt(2*KBOLTZ*math.log(2)/self.molecularMass)*freq/SPDLIGT
 
     def compute_intensity(self,trans, temperature,pf=None, wn_filter=None):
@@ -48,12 +50,12 @@ class Linelist:
         if wn_filter is None:
             wn_filter = slice(None)
 
-        gtot_f = trans["g'"].values[wn_filter]
+        gtot_f = trans["g_tot'"].values[wn_filter]
         Aif_v = trans['A_if'].values[wn_filter]
         E_i = trans['E"'].values[wn_filter]
         v = trans['v_if'].values[wn_filter]
         if pf is None:
-            pf = self.compute_partition(temperature)
+            pf = self.compute_partition(temperature, trans)
         elif not isinstance(pf, float):
             pf = pf.Q(temperature)
 
@@ -61,11 +63,9 @@ class Linelist:
 
         return ne.evaluate('gtot_f*Aif_v*exp(-c2*E_i/T)*(1-exp(-c2*v/T))/(8*PI*SPDLIGT*v*v*pf)')
     
-    def get_transitions(self, chunksize=10000):
+    def get_transitions(self,min_wn, max_wn, chunksize=10000):
         raise NotImplementedError
 
-    def prepare_transitions(self, wngrid, temperature, pressure,pf=None, wing_cutoff=25.0, chunksize=10000, threshold=1e-34):
-        pass
 
     def transitions(self, wngrid, temperature, pressure,pf=None, wing_cutoff=25.0, chunksize=10000, threshold=1e-34):
 
@@ -76,14 +76,15 @@ class Linelist:
         min_wn, max_wn = wngrid.min()-wing_cutoff, wngrid.max()+wing_cutoff
 
 
-        for df in self.get_transitions(chunksize=chunksize):
+        for df in self.get_transitions(min_wn, max_wn, chunksize=chunksize):
             read_chunks = len(df)
             v = df['v_if'].values
             transition_filter = (v >= min_wn) & (v <= max_wn)
 
             df = df[transition_filter]
             if len(df) == 0:
-                yield None, None, None, None
+                yield None, None, None, None, read_chunks  
+                continue      
             I = self.compute_intensity(df, temperature, pf=pf)
             threshold_filter = I >= threshold
             I = I[threshold_filter]
@@ -93,10 +94,12 @@ class Linelist:
             else:
                 gamma = np.zeros_like(I)
             v = df['v_if'].values
-            I = I
+            I = I*self.get_abundance(df)
             gamma = gamma
-            doppler = self.compute_doppler(temperature,v)
-            yield v, I, gamma, doppler
+            doppler = self.compute_doppler(temperature,df)
+            yield v, I, gamma, doppler, read_chunks
 
+    def get_abundance(self, df):
+        return 1.0
 
 
