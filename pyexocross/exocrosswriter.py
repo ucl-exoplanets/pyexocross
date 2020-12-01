@@ -191,7 +191,7 @@ class ExocrossInput(Logger):
         start, end = self.range
 
         return [filename for (min_wn, max_wn), filename in self._transitions 
-                if min_wn < end and max_wn > start]
+                if min_wn <= end and max_wn >= start]
 
     @property
     def Npoints(self):
