@@ -68,7 +68,7 @@ class Linelist(Logger):
 
 
     def transitions(self, wngrid, temperature, pressure,pf=None, wing_cutoff=25.0, chunksize=10000, threshold=1e-34):
-
+        import numpy as np
         self.normalize_broadeners()
         for v in self._broadeners.values():
             v.set_temperature_pressure(temperature, pressure)
