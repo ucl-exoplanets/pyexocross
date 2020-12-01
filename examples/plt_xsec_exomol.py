@@ -11,9 +11,8 @@ P = np.logspace(-13,-3,5)
 
 wngrid = np.linspace(2000,3000,10000)
 
-hl = ExomolLinelist('/Users/ahmed/Documents/Linelists/H2O')
-hl.add_available_broadener('H2',ratio=0.72)
-hl.add_available_broadener('He',ratio=0.28)
+hl = ExomolLinelist('/Users/ahmed/Documents/molecular_data/Exomol/TiO')
+hl.add_default_broadener()
 
 
 pyexo = PyExocross(hl)

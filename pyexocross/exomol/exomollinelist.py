@@ -53,17 +53,18 @@ class ExomolLinelist(Linelist):
 
     def discover_transitions(self):
         import pathlib
+        import numpy as np
         if self._prefix is not None and \
            self._path is not None:
-            trans_filename = f'{self._prefix}__*.trans'
-            trans_filename_bz2 = f'{self._prefix}__*.trans.bz2'
+            trans_filename = f'{self._prefix}*.trans'
+            trans_filename_bz2 = f'{self._prefix}*.trans.bz2'
             filename = os.path.join(self._path, trans_filename_bz2)
             trans_list = glob.glob(filename)
             if len(trans_list) == 0:
                 filename = os.path.join(self._path, trans_filename)
                 trans_list = glob.glob(filename)
             if len(trans_list) == 1:
-                filename = os.path.join(self._path, trans_list[1])
+                filename = os.path.join(self._path, trans_list[0])
                 self._transitions = [((0.0, np.inf),filename)]
             else:      
 
@@ -134,9 +135,10 @@ class ExomolLinelist(Linelist):
     
 
     def add_default_broadener(self, ratio=1.0):
+        from .exomolbroads import ExomolBroadener
         if 'default' not in self.availableBroadeners:
             gamma, n =self._exodef._default_gamma, self._exodef._default_n
-            broad = ExomolBroadener(gamma, n)
+            broad = ExomolBroadener(gamma, n, species='default')
             self.add_broadener(broad,ratio=ratio)
             
 

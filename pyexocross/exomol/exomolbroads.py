@@ -9,7 +9,7 @@ def _filter_func(trans, label, value):
 
 class ExomolBroadener(Broadener):
 
-    def __init__(self, default_gamma0, default_n0,t0=298.0, p0=1.0,
+    def __init__(self, default_gamma0, default_n0,species=None,t0=298.0, p0=1.0,
                  label_defs={},filename=None, ratio=1.0):
         super().__init__(ratio=ratio)
         
@@ -28,6 +28,7 @@ class ExomolBroadener(Broadener):
         self._broadener_values = []
         self._precomputed_values = []
         self._default_gamma = 0.0
+        self._species = species
         for k,v in label_defs.items():
             label = k
             self.add_new_broad_label(label,v)
