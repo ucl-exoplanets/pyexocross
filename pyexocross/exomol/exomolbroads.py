@@ -1,16 +1,17 @@
 import os
 import pathlib
 import numpy as np
+from ..broadener import Broadener
 def _filter_func(trans, label, value):
     return trans[label] == value
 
 
 
-class ExomolBroadener:
+class ExomolBroadener(Broadener):
 
     def __init__(self, default_gamma0, default_n0,t0=298.0, p0=1.0,
-                 label_defs={},filename=None):
-
+                 label_defs={},filename=None, ratio=1.0):
+        super().__init__(ratio=ratio)
         
         self._t0 = t0
         self._p0 = p0

@@ -43,16 +43,16 @@ class ExomolStates:
         return ne.evaluate('sum(gns*exp(-c2*E/T))')
 
 
-    def transition_states(self, transitions, temperature=1000, pf=None, threshold=None):
+    def transition_states(self, transitions):
         import numexpr as ne
         idf = transitions.iloc[:,0]
         idi = transitions.iloc[:,1]
         upper = self._df.iloc[idf]
         lower = self._df.iloc[idi]
-        if pf is None:
-            pf = self.Q(temperature)
-        elif not isinstance(pf, float):
-            pf = pf.Q(temperature)
+        # if pf is None:
+        #     pf = self.Q(temperature)
+        # elif not isinstance(pf, float):
+        #     pf = pf.Q(temperature)
             
 
 
@@ -64,14 +64,13 @@ class ExomolStates:
         Aif_v = Aif.values
         gtot_f = upper.g_tot.values
         E_i = lower.E.values
-        T = temperature
 
-        transition_frame['vif'] = v
+        transition_frame['v_if'] = v
         
-        transition_frame['Iif'] = \
-            ne.evaluate('gtot_f*Aif_v*exp(-c2*E_i/T)*(1-exp(-c2*v/T))/(8*PI*SPDLIGT*v*v*pf)')
+        # transition_frame['Iif'] = \
+        #     ne.evaluate('gtot_f*Aif_v*exp(-c2*E_i/T)*(1-exp(-c2*v/T))/(8*PI*SPDLIGT*v*v*pf)')
 
-        transition_frame['Aif'] = Aif_v
+        transition_frame['A_if'] = Aif_v
         
 
 
@@ -90,8 +89,8 @@ class ExomolStates:
 
         df=pd.DataFrame(transition_frame)
 
-        if threshold is not None:
-            df = df[df.Iif >= threshold]
+        # if threshold is not None:
+        #     df = df[df.Iif >= threshold]
         
         return df
 

@@ -203,7 +203,8 @@ class ExomolDef(Logger):
         dtype = {}
         form_conv = {'d' : np.int64,
                      'f' : np.float64,
-                     's' : str }
+                     's' : str,
+                     'i' : np.int64 }
         for case in self._quanta_cases.values():
             for label, form, desc in case:
                 headers.append(label)
