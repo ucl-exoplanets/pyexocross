@@ -85,11 +85,11 @@ class HITRANLinelist(Linelist):
 
 
     def compute_doppler(self, temperature, df):
-        from ..constants import KBOLTZ, SPDLIGT
+        from ..util import doppler_broad
         import math
         freq = df['v_if'].values
         masses = self._molmasses[df['IsoID'].values-1]
-        return np.sqrt(2*KBOLTZ*math.log(2)/masses)*freq/SPDLIGT
+        return doppler_broad(freq, masses, temperature)
 
     def get_transitions(self,min_wn, max_wn, chunksize=10000):
         from .util import read_hitran_pandas

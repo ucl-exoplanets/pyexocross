@@ -38,10 +38,10 @@ class Linelist(Logger):
 
 
     def compute_doppler(self, temperature, df):
-        from .constants import KBOLTZ, SPDLIGT
+        from .constants import KBOLTZ, SPDLIGT, AVGNO
         import math
         freq = df['v_if'].values
-        return math.sqrt(2*KBOLTZ*math.log(2)/self.molecularMass)*freq/SPDLIGT
+        return doppler_broad(freq, self.molecularMass, temperature)
 
     def compute_intensity(self,trans, temperature,pf=None, wn_filter=None):
         from .constants import PLANCK, PI, KBOLTZ, SPDLIGT, c2

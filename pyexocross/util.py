@@ -31,3 +31,10 @@ def create_grid_res(resolution, wave_min, wave_max):
         wave_list.append(wave)
 
     return np.array((wave_list ,width_list)).T
+
+
+def doppler_broad(freq, mass, temperature):
+    from .constants import KBOLTZ, SPDLIGT, AVGNO
+    import math
+
+    return np.sqrt(2*KBOLTZ*math.log(2)*AVGNO*temperature/mass)*freq/SPDLIGT

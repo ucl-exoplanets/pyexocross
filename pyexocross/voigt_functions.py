@@ -38,7 +38,6 @@ class Voigt:
 def voigt_scipy(v0, sigma, gamma):
     from scipy.special import voigt_profile
     return voigt_profile(v0, sigma, gamma)
-
 Voigt.add_voigt_function('scipy', voigt_scipy)
 
         
