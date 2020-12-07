@@ -6,7 +6,7 @@ def parallel_voigt(args, wing_cutoff=25.0, wngrid=None):
     if v is None:
         return None,None,None,None
     voigt = Voigt()
-    return voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff),count 
+    return *voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff),count 
 
 
 class PyExocross:
@@ -102,9 +102,10 @@ class PyExocross:
 
                     for fut in done:
                         res,s,e, count = fut.result()
-                        t.update(count)
+                        
                         if res is None:
                             continue
+                        t.update(count)
                         xsec[s:e] += res
                         
 
