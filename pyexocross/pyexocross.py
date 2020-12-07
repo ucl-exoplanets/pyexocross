@@ -33,30 +33,31 @@ class PyExocross:
         itera = self._linelist.transitions(_wngrid,T, P,wing_cutoff=wing_cutoff,
                                                                chunksize=chunksize,
                                                                threshold=threshold)
-        if with_progress:
-            from tqdm import tqdm
-            itera = tqdm(itera)
+
         xsec = []
 
         out_grid = []
         if self._compute_voigt:
             xsec = np.zeros_like(wngrid)
-        
-        for v, I, gamma, doppler,count in itera:
+        from tqdm import tqdm
 
-            if v is None or len(v) == 0:
-                continue
-            if self._compute_voigt:
-                self._voigt.voigt(_wngrid, v, I, doppler, gamma,cutoff=wing_cutoff, out=xsec) 
-            else:
-                out_grid.append(v)
-                xsec.append(I)
-        
-        if not self._compute_voigt:
-            wngrid = np.concatenate(out_grid)
-            xsec = np.concatenate(xsec)
+        with tqdm() as t:
+            for v, I, gamma, doppler,count in itera:
 
-        return wngrid, xsec
+                if v is None or len(v) == 0:
+                    continue
+                t.update(count)
+                if self._compute_voigt:
+                    self._voigt.voigt(_wngrid, v, I, doppler, gamma,cutoff=wing_cutoff, out=xsec) 
+                else:
+                    out_grid.append(v)
+                    xsec.append(I)
+            
+            if not self._compute_voigt:
+                wngrid = np.concatenate(out_grid)
+                xsec = np.concatenate(xsec)
+
+            return wngrid, xsec
 
     def compute_xsec_parallel(self,wngrid,T,P,with_progress=True, chunksize=10000,
                      wing_cutoff=25.0, threshold=1e-34, max_workers=4, max_jobs=100):
