@@ -4,9 +4,9 @@ from .voigt_functions import Voigt
 def parallel_voigt(args, wing_cutoff=25.0, wngrid=None):
     v, I, gamma, doppler,count = args
     if v is None:
-        return None,None,None
+        return None,None,None,None
     voigt = Voigt()
-    return voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff) 
+    return voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff),count 
 
 
 class PyExocross:
@@ -101,8 +101,8 @@ class PyExocross:
                     )
 
                     for fut in done:
-                        res,s,e = fut.result()
-                        t.update(1)
+                        res,s,e, count = fut.result()
+                        t.update(count)
                         if res is None:
                             continue
                         xsec[s:e] += res
