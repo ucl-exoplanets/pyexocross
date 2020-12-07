@@ -50,6 +50,13 @@ class ExomolLinelist(Linelist):
             if os.path.isfile(filename):
                 self.info(f'Discovered state_file {state_file}')
                 self.set_state_file(filename)
+            else:
+                state_file = f'{self._prefix}.states.bz2'
+                filename = os.path.join(self._path, state_file)
+                if os.path.isfile(filename):
+                    self.info(f'Discovered state_file {state_file}')
+                    self.set_state_file(filename)
+
 
     def discover_transitions(self):
         import pathlib

@@ -141,7 +141,9 @@ class ExomolDef(Logger):
 
             for q in range(no_quanta):
                 label = lr.read_string()
-                form = lr.read_string().split()[1].strip()
+                
+                form =lr.read_string() 
+                form = form.split()[1].strip()
                 descrp = lr.read_string()
 
                 quanta_definition.append((label, form, descrp))

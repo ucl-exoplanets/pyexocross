@@ -136,7 +136,7 @@ def moleculeClass(molid):
     
     if molname in ('CH4', 'CH3D','CH3Cl','C2H6','HNO3',
                    'SF6','HCOOH','ClONO2','C2H4',):
-        return ['v1', 'v2', 'v3', 'v4','n','C'],[2,2,2,2,2,2],3,\
+        return ['v1', 'v2', 'v3', 'v4','n','Cv'],[2,2,2,2,2,2],3,\
             [int ,int ,int ,int, str, str]
 
     return ['g_quanta',],[15,],0,[str]

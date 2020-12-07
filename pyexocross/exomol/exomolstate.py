@@ -22,8 +22,7 @@ class ExomolStates:
     def _read_state(self, filename, header, width, dtype):
         import pandas as pd
         import numpy as np
-
-        df = pd.read_fwf(filename, widths=width, names=header)
+        df = pd.read_csv(filename,delim_whitespace=True,names=header)
         
         for key, value in dtype.items():
             if value in (np.int64, np.float64, ):

@@ -15,26 +15,26 @@ class PyExocross:
     def compute_xsec(self,wngrid,T,P,with_progress=True, chunksize=10000,
                      wing_cutoff=25.0, threshold=1e-34):
         import numpy as np
-        from progress.counter import Counter
+        
         import math
         bar = None
         _wngrid = np.sort(wngrid)
 
         total_transitions = self._linelist.totalTransitions
         num_elems = (int(math.ceil(total_transitions/chunksize))-1)*2
+        itera = self._linelist.transitions(_wngrid,T, P,wing_cutoff=wing_cutoff,
+                                                               chunksize=chunksize,
+                                                               threshold=threshold)
         if with_progress:
-            bar=Counter('Processing transitions:')
+            from tqdm import tqdm
+            itera = tqdm(itera)
         xsec = []
 
         out_grid = []
         if self._compute_voigt:
             xsec = np.zeros_like(wngrid)
         
-        for v, I, gamma, doppler,count in self._linelist.transitions(_wngrid,
-                                                               T, P,
-                                                               wing_cutoff=wing_cutoff,
-                                                               chunksize=chunksize,
-                                                               threshold=threshold):
+        for v, I, gamma, doppler,count in itera:
             if bar is not None:
                 bar.next(n=count)
             if v is None or len(v) == 0:
