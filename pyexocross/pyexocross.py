@@ -6,7 +6,7 @@ from .voigt_functions import Voigt
 def parallel_voigt(args, wing_cutoff=25.0, wngrid=None):
     v, I, gamma, doppler,count = args
     if v is None:
-        return None,None,None,None
+        return None,None,None,count
     voigt = Voigt()
     return *voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff),count 
 
@@ -107,9 +107,11 @@ class PyExocross:
                     break
                 job_queue.task_done()
                 res, s, e, count = future.result()
+                if count is not None:
+                    t.update(count)
                 if res is None:
                     continue
-                t.update(count)
+                
                 xsec[s:e]+=res
         job_creator.join()
 
