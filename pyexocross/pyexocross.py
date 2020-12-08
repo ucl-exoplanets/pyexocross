@@ -12,10 +12,22 @@ def parallel_voigt(args, wing_cutoff=25.0, wngrid=None):
 
 def create_jobs(linelist_iterator, wing_cutoff, wngrid, queue, num_workers):
     import concurrent.futures
+    import numpy as np
     with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
-        for task in linelist_iterator:
+        for v, I, gamma, doppler,count in linelist_iterator:
+            if v is None or len(v) == 0:
+                continue
+            v_s = np.array_split(v,num_workers)
+            I_s = np.array_split(I,num_workers)
+            gamma_s = np.array_split(gamma,num_workers)
+            doppler_s = np.array_split(doppler,num_workers)
+            count_s = [len(x) for x in v_s]
+            for task in zip(v_s,I_s, gamma_s, doppler_s, count_s):
+                if count_s == 0:
+                    continue
 
-            queue.put(executor.submit(parallel_voigt, task, wing_cutoff, wngrid))
+                
+                queue.put(executor.submit(parallel_voigt, task, wing_cutoff, wngrid))
     queue.put(False)
 
 class PyExocross:
