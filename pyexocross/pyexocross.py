@@ -5,6 +5,7 @@ from .voigt_functions import Voigt
 
 def parallel_voigt(args, wing_cutoff=25.0, wngrid=None):
     v, I, gamma, doppler,count = args
+
     if v is None or len(v)==0:
         return None,None,None,count
     voigt = Voigt()
@@ -22,7 +23,7 @@ def create_jobs(linelist_iterator, wing_cutoff, wngrid, queue, num_workers):
             I_s = np.array_split(I,num_workers)
             gamma_s = np.array_split(gamma,num_workers)
             doppler_s = np.array_split(doppler,num_workers)
-            count_s = [len(x) for x in v_s]
+            count_s = [count//num_workers for x in v_s]
             for task in zip(v_s,I_s, gamma_s, doppler_s, count_s):
                 # if count_s == 0:
                 #     continue

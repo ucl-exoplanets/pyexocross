@@ -23,13 +23,24 @@ class Voigt:
         max_v = v.max()+cutoff
 
         start = max(0,wngrid.searchsorted(v.min()-cutoff)-1)
-        end = min(wngrid.searchsorted(v.max()+cutoff),len(wngrid-1))
+        end = min(wngrid.searchsorted(v.max()+cutoff),len(wngrid))
+        res = np.zeros(shape=(end-start))
+        for i in range(start,end):
+            idx = i-start
+            x = wngrid[i] - v
+            fil = np.abs(x) <=cutoff
+            x=x[fil]
+            sigma = doppler[fil]/RT2LN2
+            gamma = lorentz[fil]
+            res[idx] = np.sum(self._f(x,sigma,gamma)*I[fil])
 
-        x = wngrid[start:end,None] - v[None,:]
 
-        sigma = doppler/RT2LN2
-        gamma = lorentz
-        res = np.sum(self._f(x,sigma[None,:],gamma[None,:])*I[None,:],axis=1)
+
+        # x = wngrid[start:end,None] - v[None,:]
+
+        # sigma = doppler/RT2LN2
+        # gamma = lorentz
+        # res = np.sum(self._f(x,sigma[None,:],gamma[None,:])*I[None,:],axis=1)
         if out is None:
             return res, start, end
         else:
