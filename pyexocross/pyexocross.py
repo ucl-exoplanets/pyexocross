@@ -16,6 +16,7 @@ def create_jobs(linelist_iterator, wing_cutoff, wngrid, queue, num_workers):
     with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
         for v, I, gamma, doppler,count in linelist_iterator:
             if v is None or len(v) == 0:
+                queue.put(executor.submit(parallel_voigt, (v, I, gamma, doppler,count), wing_cutoff, wngrid))
                 continue
             v_s = np.array_split(v,num_workers)
             I_s = np.array_split(I,num_workers)
@@ -23,8 +24,8 @@ def create_jobs(linelist_iterator, wing_cutoff, wngrid, queue, num_workers):
             doppler_s = np.array_split(doppler,num_workers)
             count_s = [len(x) for x in v_s]
             for task in zip(v_s,I_s, gamma_s, doppler_s, count_s):
-                if count_s == 0:
-                    continue
+                # if count_s == 0:
+                #     continue
 
                 
                 queue.put(executor.submit(parallel_voigt, task, wing_cutoff, wngrid))
