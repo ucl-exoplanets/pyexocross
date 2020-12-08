@@ -93,13 +93,13 @@ class PyExocross:
             xsec = np.zeros_like(wngrid)
         
         from tqdm import tqdm
-
+        total_size = self._linelist.estimated_count(wngrid)
         job_queue = queue.Queue(max_jobs)
         job_creator = threading.Thread(target=create_jobs,
                                         args=(itera,
                                                 wing_cutoff, wngrid, job_queue, max_workers))
         job_creator.start()
-        with tqdm() as t:
+        with tqdm(total=total_size) as t:
             while True:
                 future = job_queue.get()
                 if not future:

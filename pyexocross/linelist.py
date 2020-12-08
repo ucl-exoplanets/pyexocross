@@ -66,6 +66,9 @@ class Linelist(Logger):
     def get_transitions(self,min_wn, max_wn, chunksize=10000):
         raise NotImplementedError
 
+    
+    def estimated_count(self, wngrid):
+        return self.totalTransitions
 
     def transitions(self, wngrid, temperature, pressure,pf=None, wing_cutoff=25.0, chunksize=10000, threshold=1e-34):
         import numpy as np

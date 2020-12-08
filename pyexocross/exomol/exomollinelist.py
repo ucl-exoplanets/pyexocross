@@ -154,6 +154,14 @@ class ExomolLinelist(Linelist):
         return [filename for (min_wn, max_wn), filename in self._transitions 
                 if min_wn <= end and max_wn >= start]
 
+    def estimated_count(self, wngrid):
+        import pathlib
+        start = wngrid.min()
+        end = wngrid.max()
+
+        files = self.valid_transitions(start,end)
+        return sum([pathlib.Path(f).stat().st_size//38 for f in files])
+
     def set_state_file(self, state_file):
         
         self._state_file = state_file
