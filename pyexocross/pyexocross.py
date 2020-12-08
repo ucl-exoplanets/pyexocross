@@ -49,8 +49,8 @@ class PyExocross:
         if self._compute_voigt:
             xsec = np.zeros_like(wngrid)
         from tqdm import tqdm
-
-        with tqdm() as t:
+        total_size = self._linelist.estimated_count(wngrid)
+        with tqdm(total=total_size) as t:
             for v, I, gamma, doppler,count in itera:
 
                 if v is None or len(v) == 0:
