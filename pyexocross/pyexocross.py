@@ -1,6 +1,8 @@
 from .linelist import Linelist
 from .voigt_functions import Voigt
 
+
+
 def parallel_voigt(args, wing_cutoff=25.0, wngrid=None):
     v, I, gamma, doppler,count = args
     if v is None:
@@ -8,6 +10,13 @@ def parallel_voigt(args, wing_cutoff=25.0, wngrid=None):
     voigt = Voigt()
     return *voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff),count 
 
+def create_jobs(linelist_iterator, wing_cutoff, wngrid, queue, num_workers):
+    import concurrent.futures
+    with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+        for task in linelist_iterator:
+
+            queue.put(executor.submit(parallel_voigt, task, wing_cutoff, wngrid))
+    queue.put(False)
 
 class PyExocross:
 
@@ -60,12 +69,14 @@ class PyExocross:
             return wngrid, xsec
 
     def compute_xsec_parallel(self,wngrid,T,P,with_progress=True, chunksize=10000,
-                     wing_cutoff=25.0, threshold=1e-34, max_workers=4, max_jobs=100):
+                     wing_cutoff=25.0, threshold=1e-34, max_workers=4, max_jobs=None):
         import numpy as np
-        import concurrent.futures
+        
         import itertools
         from tqdm import tqdm
         import math
+        import threading
+        import queue
         bar = None
         _wngrid = np.sort(wngrid)
 
@@ -75,8 +86,6 @@ class PyExocross:
                                                                threshold=threshold)
 
 
-        itera = itera
-
         xsec = []
 
         out_grid = []
@@ -84,37 +93,24 @@ class PyExocross:
             xsec = np.zeros_like(wngrid)
         
         from tqdm import tqdm
+
+        job_queue = queue.Queue(max_jobs)
+        job_creator = threading.Thread(target=create_jobs,
+                                        args=(itera,
+                                                wing_cutoff, wngrid, job_queue, max_workers))
+        job_creator.start()
         with tqdm() as t:
-            with concurrent.futures.ProcessPoolExecutor() as executor:
+            while True:
+                future = job_queue.get()
+                if not future:
+                    job_queue.task_done()
+                    break
+                job_queue.task_done()
+                res, s, e, count = future.result()
+                if res is None:
+                    continue
+                t.update(count)
+                xsec[s:e]+=res
+        job_creator.join()
 
-                # Schedule the first N futures.  We don't want to schedule them all
-                # at once, to avoid consuming excessive amounts of memory.
-
-                futures = {
-                    executor.submit(parallel_voigt, task, wing_cutoff, wngrid)
-                    for task in itertools.islice(itera, max_jobs)
-                }
-
-                while futures:
-                    # Wait for the next future to complete.
-                    done, futures = concurrent.futures.wait(
-                        futures, return_when=concurrent.futures.FIRST_COMPLETED
-                    )
-
-                    for fut in done:
-                        res,s,e, count = fut.result()
-                        
-                        if res is None:
-                            continue
-                        t.update(count)
-                        xsec[s:e] += res
-                        
-
-                    # Schedule the next set of futures.  We don't want more than N futures
-                    # in the pool at a time, to keep memory consumption down.
-                    for task in itertools.islice(itera, len(done)):
-                        futures.add(
-                            executor.submit(parallel_voigt, task, wing_cutoff, wngrid)
-                        )
-
-            return wngrid, xsec
+        return wngrid, xsec
