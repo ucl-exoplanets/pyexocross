@@ -5,7 +5,7 @@ from .voigt_functions import Voigt
 
 def parallel_voigt(args, wing_cutoff=25.0, wngrid=None):
     v, I, gamma, doppler,count = args
-    if v is None:
+    if v is None or len(v)==0:
         return None,None,None,count
     voigt = Voigt()
     return *voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff),count 
