@@ -11,12 +11,18 @@ class Voigt:
         if name not in cls.available_voigt:
             cls.available_voigt[name] =func
 
-    def __init__(self, voigt_function='scipy'):
+    def __init__(self, voigt_function='scipy', accurate_sum=False):
         self.set_voigt_function(voigt_function)
+        self.use_accurate_sum(accurate_sum)
 
     def set_voigt_function(self, voigt_function):
         self._f = self.available_voigt[voigt_function]
 
+    def use_accurate_sum(self, accurate_sum):
+        self._sum = np.sum
+        if accurate_sum:
+            from accupy import fsum
+            self._sum = fsum
     def voigt(self, wngrid, v, I, doppler, lorentz, cutoff=25.0, out=None):
         from .constants import RT2LN2
         min_v = v.min()-cutoff
@@ -32,7 +38,7 @@ class Voigt:
             x=x[fil]
             sigma = doppler[fil]/RT2LN2
             gamma = lorentz[fil]
-            res[idx] = np.sum(self._f(x,sigma,gamma)*I[fil])
+            res[idx] = self._sum(self._f(x,sigma,gamma)*I[fil])
 
 
 

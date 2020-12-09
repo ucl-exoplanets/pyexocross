@@ -20,7 +20,10 @@ class Linelist(Logger):
     def remove_broadener(self, species):
         if species in self._broadeners:
             del self._broadeners[species]
-        
+    
+    @property
+    def molecule(self):
+        raise NotImplementedError
 
 
     def normalize_broadeners(self):

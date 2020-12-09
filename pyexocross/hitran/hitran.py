@@ -75,6 +75,10 @@ class HITRANLinelist(Linelist):
             self._abundance_vals[iso-1] = abundance(self._molid, iso)
         self._abundance_vals/=self._abundance_vals.sum()
 
+    @property
+    def molecule(self):
+        from .hapi import moleculeName
+        return moleculeName(self._molid)
 
         
     def compute_partition(self, temperature, df):

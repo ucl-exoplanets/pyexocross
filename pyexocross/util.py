@@ -11,6 +11,47 @@ def compute_gamma(gamma0,n0, T, P, t0, p0):
     
     return gamma0*((t0/T)**n0)*(P/p0)
 
+
+def sanitize_molecule_string(molecule):
+    """
+    Cleans a molecule string to match up
+    with molecule naming in TauREx3.
+
+    e.g:
+
+    H2O -> H2O
+
+    1H2-16O -> H2O
+
+    Parameters
+    ----------
+    molecule: str
+        Molecule to sanitize
+    
+    Returns
+    -------
+    str:
+        Sanitized name
+
+    """
+    return ''.join([''.join(s) for s in
+                    re.findall('([A-Z][a-z]?)([0-9]*)', molecule)])
+
+def conversion_factor(from_unit, to_unit):
+    import astropy.units as u
+
+    try:
+        from_conv = u.Unit(from_unit)
+    except:
+        from_conv = u.Unit(from_unit, format="cds")
+
+    try:
+        to_conv = u.Unit(to_unit)
+    except:
+        to_conv = u.Unit(to_unit, format="cds")
+
+    return from_conv.to(to_unit)
+
 def create_grid_res(resolution, wave_min, wave_max):
     #
     # R = l/Dl

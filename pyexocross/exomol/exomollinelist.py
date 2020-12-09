@@ -21,6 +21,11 @@ class ExomolLinelist(Linelist):
             self.discover_def()
 
     @property
+    def molecule(self):
+        from ..util import sanitize_molecule_string
+        return sanitize_molecule_string(self._exodef._molecule_slug)
+
+    @property
     def totalTransitions(self):
         return self._exodef._total_transitions
 

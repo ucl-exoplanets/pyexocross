@@ -14,7 +14,10 @@ install_requires = ['numpy',
                     'tabulate',
                     'taurex']
 
-entry_points = {}
+console_scripts = ['pyexocross=pyexocross.run:run_pyexocross']
+
+
+entry_points = {'console_scripts': console_scripts, }
 
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -52,7 +55,7 @@ setup(name='pyexocross',
     #long_description_content_type="text/markdown",
     #keywords = ['exoplanet','retrieval','taurex','taurex3','atmosphere','atmospheric'],
     #include_package_data=True,
-    #entry_points=entry_points,
+    entry_points=entry_points,
     provides=provides,
     requires=requires,
     install_requires=install_requires,)

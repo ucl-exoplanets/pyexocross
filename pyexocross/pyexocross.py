@@ -3,22 +3,23 @@ from .voigt_functions import Voigt
 
 
 
-def parallel_voigt(args, wing_cutoff=25.0, wngrid=None):
+def parallel_voigt(args, wing_cutoff=25.0, wngrid=None, accurate=False, function='scipy'):
     v, I, gamma, doppler,count = args
 
     if v is None or len(v)==0:
         return None,None,None,count
-    voigt = Voigt()
+    voigt = Voigt(voigt_function=function, accurate_sum=accurate)
     return *voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff),count 
 
-def create_jobs(linelist_iterator, wing_cutoff, wngrid, queue, num_workers):
+def create_jobs(linelist_iterator, wing_cutoff, wngrid, queue, num_workers, accurate=False, function='scipy'):
     import concurrent.futures
     import numpy as np
     with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
         #for task in linelist_iterator
         for v, I, gamma, doppler,count in linelist_iterator:
             if v is None or len(v) == 0:
-                queue.put(executor.submit(parallel_voigt, (v, I, gamma, doppler,count), wing_cutoff, wngrid))
+                queue.put(executor.submit(parallel_voigt, (v, I, gamma, doppler,count), wing_cutoff, wngrid,
+                                                            accurate, function))
                 continue
             v_s = np.array_split(v,num_workers)
             I_s = np.array_split(I,num_workers)
@@ -28,7 +29,7 @@ def create_jobs(linelist_iterator, wing_cutoff, wngrid, queue, num_workers):
             for task in zip(v_s,I_s, gamma_s, doppler_s, count_s):
                 # if count_s == 0:
                 #     continue
-                queue.put(executor.submit(parallel_voigt, task, wing_cutoff, wngrid))
+                queue.put(executor.submit(parallel_voigt, task, wing_cutoff, wngrid, accurate, function))
     queue.put(False)
 
 class PyExocross:
@@ -36,12 +37,19 @@ class PyExocross:
     def __init__(self, linelist: Linelist, compute_voigt=True):
         self._linelist = linelist
         self._voigt = Voigt()
+    
         self._compute_voigt = compute_voigt
-
+        self.set_voigt_function('scipy')
+        self.use_accurate_sum(False)
 
     def set_voigt_function(self, voigt_function):
+        self._voigt_func = voigt_function
         self._voigt.set_voigt_function(voigt_function)
-    
+
+    def use_accurate_sum(self, accurate_sum):
+        self._voigt_sum = accurate_sum
+        self._voigt.use_accurate_sum(accurate_sum)
+
     def compute_xsec(self,wngrid,T,P,with_progress=True, chunksize=10000,
                      wing_cutoff=25.0, threshold=1e-34):
         import numpy as np
@@ -110,7 +118,7 @@ class PyExocross:
         job_queue = queue.Queue(max_jobs)
         job_creator = threading.Thread(target=create_jobs,
                                         args=(itera,
-                                                wing_cutoff, wngrid, job_queue, max_workers))
+                                                wing_cutoff, wngrid, job_queue, max_workers,self._voigt_sum,self._voigt_func))
         job_creator.start()
         with tqdm(total=total_size) as t:
             while True:
