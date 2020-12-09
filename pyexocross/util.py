@@ -13,6 +13,7 @@ def compute_gamma(gamma0,n0, T, P, t0, p0):
 
 
 def sanitize_molecule_string(molecule):
+    import re
     """
     Cleans a molecule string to match up
     with molecule naming in TauREx3.
