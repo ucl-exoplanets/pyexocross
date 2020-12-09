@@ -77,7 +77,7 @@ def run_pyexocross():
                 
                 if b.lower() == 'default':
                     ll.add_default_broadener(ratio=r)
-                elif b.lower() in ll.availableBroadeners:
+                elif b in ll.availableBroadeners:
                     ll.add_available_broadener(b, ratio=r)
                 else:
                     raise ValueError(f'Exomol: Unknown {b} or file not found in linelist path')            
@@ -96,6 +96,8 @@ def run_pyexocross():
 
     wn,xsec = pyexo.compute_xsec_parallel(grid,temperature,pressure_value, chunksize=args.chunk, threshold=args.thresh, wing_cutoff=args.wing,
                                           max_workers=args.nworkers,max_jobs=max_jobs)
+
+    # wn,xsec = pyexo.compute_xsec(grid,temperature,pressure_value, chunksize=args.chunk, threshold=args.thresh, wing_cutoff=args.wing)
 
     filename = args.output
     if filename is None:
