@@ -15,7 +15,7 @@ def run_pyexocross():
     parser.add_argument("-r","--ratios",dest="ratios",nargs="+",type=float,help="corresponding ratios for each broadener. Default equally weighs them")
     parser.add_argument("-n","--nworkers",dest="nworkers",type=int,default=2,help="Number of worker threads to spin up for voigt calculation")
     parser.add_argument("-c","--chunk",type=int,default=100000,dest="chunk",help='How many transitions to read at a time')
-    parser.add_argument("-o",type=str,help="Output filename")
+    parser.add_argument("-o",type=str,dest="output",help="Output filename")
     parser.add_argument("-s",type=float,nargs="+",default=[0.1,10000], help='Spectral range')
     parser.add_argument("--thresh",type=float,default=1e-30, help='Threshold for intensities (default: %(default)s cm/molecule)')
     parser.add_argument("--wing",type=float,default=25.0, help='Voigt wing cutoff (default: %(default)s cm-1)')
@@ -97,7 +97,12 @@ def run_pyexocross():
     wn,xsec = pyexo.compute_xsec_parallel(grid,temperature,pressure_value, chunksize=args.chunk, threshold=args.thresh, wing_cutoff=args.wing,
                                           max_workers=args.nworkers,max_jobs=max_jobs)
 
+    filename = args.output
+    if filename is None:
+        filename = f'{ll.molecule}_{temperature}K_{pressure_value}bar_R={R}.xsec'
 
+    print(f'Writing output to {filename}')
+    np.savetxt(filename, np.vstack((wn,xsec)).T)
     if args.plot:
         import matplotlib.pyplot as plt
 
