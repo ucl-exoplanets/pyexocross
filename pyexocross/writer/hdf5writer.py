@@ -1,6 +1,12 @@
 import h5py
 import datetime
 import numpy as np
+
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
 class HDF5Writer:
 
 
@@ -17,10 +23,13 @@ class HDF5Writer:
         self.flushrate= flush_rate
         self.append = False
         self._write_count = 0
+
+    
+
     def add_cross_section(self, T, P, wngrid, xsec):
 
-        self.P.append(np.where(P == self.pressures)[0][0])
-        self.T.append(np.where(T == self.temperatures)[0][0])
+        self.P.append(find_nearest(self.pressures,P))
+        self.T.append(find_nearest(self.temperatures,T))
         self.xsecs.append(xsec)
         self._write_count += 1
         self.wngrid = wngrid
