@@ -3,6 +3,7 @@
 def run_pyexocross():
     import numpy as np
     import argparse
+    import os
     from .pyexocross import PyExocross
     from .util import create_grid_res, convert_to_wavenumber
     parser = argparse.ArgumentParser()
@@ -99,12 +100,17 @@ def run_pyexocross():
 
     # wn,xsec = pyexo.compute_xsec(grid,temperature,pressure_value, chunksize=args.chunk, threshold=args.thresh, wing_cutoff=args.wing)
 
-    filename = args.output
-    if filename is None:
-        filename = f'{ll.molecule}_{temperature}K_{pressure_value}bar_R={R}.xsec'
+    output_folder = args.output
+    
+    filename = f'{ll.molecule}_{temperature}K_{pressure_value}bar_R={R}.xsec'
+    out_filename = filename
+    if os.path.isdir(output_folder):
+        out_filename = os.path.join(output_folder,filename)
+    
 
-    print(f'Writing output to {filename}')
-    np.savetxt(filename, np.vstack((wn,xsec)).T)
+
+    print(f'Writing output to {out_filename}')
+    np.savetxt(out_filename, np.vstack((wn,xsec)).T)
     if args.plot:
         import matplotlib.pyplot as plt
 
