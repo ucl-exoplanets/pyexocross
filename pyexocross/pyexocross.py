@@ -9,7 +9,8 @@ def parallel_voigt(args, wing_cutoff=25.0, wngrid=None, accurate=False, function
     if v is None or len(v)==0:
         return None,None,None,count
     voigt = Voigt(voigt_function=function, accurate_sum=accurate)
-    return *voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff),count 
+    result = voigt.voigt(wngrid, v, I, doppler, gamma,cutoff=wing_cutoff)
+    return result[0],result[1],result[2],count 
 
 def create_jobs(linelist_iterator, wing_cutoff, wngrid, queue, num_workers, accurate=False, function='scipy'):
     import concurrent.futures
