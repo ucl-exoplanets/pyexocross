@@ -104,7 +104,7 @@ def run_pyexocross():
     
     filename = f'{ll.molecule}_{temperature}K_{pressure_value}bar_R={R}.xsec'
     out_filename = filename
-    if output_file is not None and os.path.isdir(output_folder):
+    if output_folder is not None and os.path.isdir(output_folder):
         out_filename = os.path.join(output_folder,filename)
     
 
