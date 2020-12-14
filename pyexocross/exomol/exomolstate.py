@@ -31,7 +31,10 @@ class ExomolStates:
                 df[key] = pd.to_numeric(df[key], errors='coerce')
                 if value is np.int64:
                     d = 'Int64'
-                    df[key] = df[key].astype(d)
+                    try:
+                        df[key] = df[key].astype(d)
+                    except:
+                        print(f'Could not coerce {key} into int64')
         return df
 
     def Q(self, T):
