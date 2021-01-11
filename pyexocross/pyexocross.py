@@ -101,7 +101,8 @@ class PyExocross:
         import queue
         bar = None
         _wngrid = np.sort(wngrid)
-
+        if max_jobs is None:
+            max_jobs = max_workers*4
 
         itera = self._linelist.transitions(_wngrid,T, P,wing_cutoff=wing_cutoff,
                                                                chunksize=chunksize,

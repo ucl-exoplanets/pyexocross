@@ -11,8 +11,7 @@ requires = []
 
 install_requires = ['numpy',
                     'scipy',
-                    'tabulate',
-                    'taurex']
+                    'tabulate']
 
 console_scripts = ['pyexocross=pyexocross.run:run_pyexocross']
 
