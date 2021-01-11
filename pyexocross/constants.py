@@ -14,7 +14,7 @@ import math
 # c2         =  1.43877736d0              ! second radiative constant NIST http://physics.nist.gov/cgi-bin/cuu/Value?c22ndrc
 # R_         =  8.3144598d0               ! Molar gas constant R, J/mol/K
 RT2LN2 = math.sqrt(2*math.log(2))
-
+SQRT2PI = math.sqrt(2*math.pi)
 PLANCK = ac.h.to('erg s').value
 AVGNO = ac.N_A.value
 SPDLIGT = ac.c.to('cm/s').value
